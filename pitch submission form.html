@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Launchpad Pitch Portal</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link href="css/styles.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(to right, #e0f7fa, #80deea);
+      padding: 1rem;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: #111827;
+      position: relative;
+    }
+
+    .back-to-home {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background-color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      color: #111827;
+      font-weight: 500;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      transition: all 0.2s ease;
+      z-index: 1000;
+    }
+
+    .back-to-home:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      color: var(--primary-color);
+    }
+
+    .form-container {
+      max-width: 800px;
+      margin: 4rem auto 2rem;
+      background: #ffffff;
+      padding: 2rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #111827;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+
+    .subtitle {
+      color: #6b7280;
+      font-size: 0.875rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    label {
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      outline: none;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 130px;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: 1rem;
+    }
+
+    button:hover {
+      background-color: #2563eb;
+      transform: translateY(-1px);
+    }
+
+    .field-icon {
+      margin-right: 8px;
+      color: var(--primary-color);
+    }
+
+    small {
+      color: #6b7280;
+      font-size: 0.875rem;
+    }
+
+    @media (max-width: 768px) {
+      .form-container {
+        margin: 5rem 1rem 1rem;
+        padding: 1.5rem;
+      }
+
+      .back-to-home {
+        top: 10px;
+        left: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="back-to-home">
+    <i class="fas fa-arrow-left"></i>
+    Back to Home
+  </a>
+
+  <div class="form-container">
+    <h1 class="text-center mb-4"><i class="fas fa-rocket field-icon"></i>Launchpad - Startup Pitch Submission</h1>
+    <p class="text-center text-muted mb-4">Share your innovative startup idea with the world</p>
+    <form id="pitchForm">
+      <div>
+        <label for="startupName"><i class="fas fa-lightbulb field-icon"></i>Startup Name</label>
+        <input type="text" id="startupName" name="startupName" required />
+      </div>
+
+      <div>
+        <label for="founderName"><i class="fas fa-user field-icon"></i>Founder Name</label>
+        <input type="text" id="founderName" name="founderName" required />
+      </div>
+
+      <div>
+        <label for="email"><i class="fas fa-envelope field-icon"></i>Email</label>
+        <input type="email" id="email" name="email" required />
+      </div>
+
+      <div>
+        <label for="website"><i class="fas fa-globe field-icon"></i>Company Website</label>
+        <input type="url" id="website" name="website" placeholder="https://www.example.com" pattern="https?://.+" title="Please enter a valid URL starting with http:// or https://" />
+      </div>
+
+      <div>
+        <label for="youtube"><i class="fab fa-youtube field-icon"></i>YouTube Introduction Video</label>
+        <input type="url" id="youtube" name="youtube" placeholder="https://www.youtube.com/watch?v=..." />
+        <small style="color: #666; display: block; margin-top: 5px;">Share your company's introduction or pitch video</small>
+      </div>
+
+      <div>
+        <label for="domain"><i class="fas fa-briefcase field-icon"></i>Industry / Domain</label>
+        <input type="text" id="domain" name="domain" placeholder="e.g., HealthTech, EdTech, AI" required />
+      </div>
+
+      <div>
+        <label for="category"><i class="fas fa-tags field-icon"></i>Company Category</label>
+        <select id="category" name="category" required>
+          <option value="">Select company category</option>
+          <option value="b2b">B2B (Business to Business)</option>
+          <option value="b2c">B2C (Business to Consumer)</option>
+          <option value="b2b2c">B2B2C (Business to Business to Consumer)</option>
+          <option value="c2c">C2C (Consumer to Consumer)</option>
+          <option value="saas">SaaS (Software as a Service)</option>
+          <option value="marketplace">Marketplace</option>
+          <option value="ecommerce">E-commerce</option>
+          <option value="fintech">FinTech</option>
+          <option value="healthtech">HealthTech</option>
+          <option value="edtech">EdTech</option>
+          <option value="deeptech">Deep Tech</option>
+          <option value="social">Social Impact</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="stage"><i class="fas fa-chart-line field-icon"></i>Company Stage</label>
+        <select id="stage" name="stage" required>
+          <option value="">Select company stage</option>
+          <option value="idea">Idea Stage</option>
+          <option value="mvp">MVP/Prototype</option>
+          <option value="early">Early Traction</option>
+          <option value="growth">Growth Stage</option>
+          <option value="scaling">Scaling</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="funding"><i class="fas fa-money-bill-wave field-icon"></i>Funding Status</label>
+        <select id="funding" name="funding" required>
+          <option value="">Select funding status</option>
+          <option value="bootstrapped">Bootstrapped</option>
+          <option value="seed">Seed</option>
+          <option value="pre-seed">Pre-seed</option>
+          <option value="series-a">Series A</option>
+          <option value="series-b">Series B+</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="teamSize"><i class="fas fa-users field-icon"></i>Team Size</label>
+        <select id="teamSize" name="teamSize" required>
+          <option value="">Select team size</option>
+          <option value="solo">Solo Founder</option>
+          <option value="2-5">2-5 employees</option>
+          <option value="6-10">6-10 employees</option>
+          <option value="11-20">11-20 employees</option>
+          <option value="20+">20+ employees</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="targetMarket"><i class="fas fa-bullseye field-icon"></i>Target Market</label>
+        <input type="text" id="targetMarket" name="targetMarket" placeholder="e.g., Small businesses in US, Global consumers" required />
+      </div>
+
+      <div>
+        <label for="summary"><i class="fas fa-align-left field-icon"></i>Pitch Summary</label>
+        <textarea id="summary" name="summary" placeholder="Describe your startup idea, vision, and what makes it unique..." required></textarea>
+      </div>
+
+      <button type="submit"><i class="fas fa-paper-plane"></i> Submit Pitch</button>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('pitchForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(this).entries());
+      console.log("Startup Pitch Submitted:", data);
+      // Store the form data in localStorage for persistence
+      localStorage.setItem('pitchData', JSON.stringify(data));
+      // Redirect to the dashboard
+      window.location.href = 'dashboard.html';
+    });
+  </script>
+
+</body>
+</html>
