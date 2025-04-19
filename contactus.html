@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contact Us</title>
+
+  <!-- Font Awesome CDN for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <!-- Bootstrap CSS for navbar -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    /* Add navbar centering styles */
+    .navbar .container {
+      max-width: 100%;
+      padding: 0 15px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .navbar-nav {
+      margin: 0 auto;
+    }
+
+    .navbar-brand {
+      margin-right: 2rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .navbar-collapse {
+      flex-grow: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background:linear-gradient(to right, #e0f7fa, #80deea);
+      color: #333;
+    }
+
+    .contact-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      max-width: 1000px;
+      margin: 50px auto;
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      gap: 30px;
+    }
+
+    .contact-left,
+    .contact-right {
+      flex: 1 1 400px;
+    }
+
+    .contact-left h1 {
+      font-size: 32px;
+      margin-bottom: 15px;
+      color: #0d6efd;
+    }
+
+    .contact-left p {
+      margin: 12px 0;
+      font-size: 16px;
+    }
+
+    .contact-left i {
+      color: #0d6efd;
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .name-fields {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    textarea {
+      padding: 12px;
+      font-size: 16px;
+      margin-bottom: 15px;
+      border: 1px solid #cfe2ff;
+      border-radius: 6px;
+      width: 100%;
+      transition: border 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    input:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #0d6efd;
+      box-shadow: 0 0 5px rgba(13, 110, 253, 0.4);
+    }
+
+    .name-fields input {
+      flex: 1;
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    button {
+      background-color: #0d6efd;
+      color: white;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 30px;
+      font-size: 16px;
+      cursor: pointer;
+      align-self: flex-start;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0b5ed7;
+    }
+
+    @media (max-width: 768px) {
+      .contact-container {
+        flex-direction: column;
+        padding: 20px;
+      }
+
+      .name-fields {
+        flex-direction: column;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">
+        <i class="fas fa-rocket"></i> LaunchPad
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="pitches.html">Pitches</a></li>
+          <li class="nav-item"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="aboutus.html">About Us</a></li>
+          <li class="nav-item"><a class="nav-link" href="contactus.html">Contact Us</a></li>
+        </ul>
+        <div class="d-flex align-items-center">
+          <a class="btn btn-outline-light me-2" href="register.html">Register</a>
+          <a class="btn btn-light" href="login.html">Sign in</a>
+          <a class="btn btn-light ms-2" href="profile.html" id="profileBtn" style="display: none;">Profile</a>
+          <button class="btn btn-outline-light ms-2" onclick="handleLogout()" id="logoutBtn" style="display: none;">Logout</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Contact Form Section -->
+  <div class="contact-container">
+    <div class="contact-left">
+      <h1>Contact Us</h1>
+      <p><i class="fas fa-phone"></i>484.324.2400</p>
+      <p><i class="fas fa-envelope"></i>info@kitclg.com</p>
+      <p><i class="fas fa-map-marker-alt"></i>KIT College Kolhapur<br>Gokul Shirgav, 19063</p>
+    </div>
+
+    <div class="contact-right">
+      <form id="contactForm">
+        <div class="name-fields">
+          <input type="text" placeholder="First" name="firstName" required />
+          <input type="text" placeholder="Last" name="lastName" required />
+        </div>
+        <input type="email" placeholder="example@email.com" name="email" required />
+        <input type="tel" placeholder="xxx-xxx-xxxx" name="phone" />
+        <textarea placeholder="Type your message ..." rows="5" name="message" required></textarea>
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Form Handling Script -->
+  <script>
+    document.getElementById('contactForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const data = {};
+      formData.forEach((value, key) => (data[key] = value));
+      console.log("Form Submitted:", data);
+      alert("Thank you! Your message has been submitted.");
+      this.reset();
+    });
+  </script>
+
+</body>
+</html>

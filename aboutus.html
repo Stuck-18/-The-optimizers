@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About Us - Launchpad</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #e0f7fa, #80deea);
+      color: #333;
+      
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      padding: 40px 20px;
+    }
+
+    /* Add a new class for the nav container */
+    .navbar .container {
+      max-width: 100%;
+      padding: 0 15px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Center the navigation items */
+    .navbar-nav {
+      margin: 0 auto;
+    }
+
+    .navbar-brand {
+      margin-right: 2rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .navbar-collapse {
+      flex-grow: 0;
+    }
+
+    h1, h2 {
+      text-align: center;
+      color: #00796b;
+    }
+
+    p {
+      font-size: 18px;
+      line-height: 1.6;
+      margin-bottom: 25px;
+      text-align: center;
+    }
+
+    .team-section {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 40px;
+    }
+
+    .team-member {
+      background-color: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+      padding: 20px;
+      width: 42%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      
+    }
+
+    .team-member:hover {
+      transform: scale(1.06);
+      box-shadow: 0 12px 20px rgba(0,0,0,0.2);
+    }
+
+    .team-member img {
+      width: 110px;
+      height: 110px;
+      object-fit: cover;
+      border-radius: 50%;
+      margin-bottom: 12px;
+      border: 3px solid #009688;
+    }
+
+    .team-member h3 {
+      margin: 8px 0 4px;
+      font-size: 18px;
+      color: #009688;
+    }
+
+    .team-member p {
+      margin: 0;
+      font-size: 15px;
+    }
+
+    @keyframes fadeInCard {
+      0% {
+        opacity: 0;
+        
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .launchpad-info {
+      margin-top: 60px;
+      background-color: #ffffff;
+      padding: 30px 20px;
+      border-radius: 16px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+     
+    }
+
+    .launchpad-info h2 {
+      color: #00695c;
+    }
+
+    .launchpad-info ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .launchpad-info li {
+      margin: 15px 0;
+      font-size: 17px;
+      position: relative;
+      padding-left: 25px;
+    }
+
+    .launchpad-info li::before {
+      content: "🚀";
+      position: absolute;
+      left: 0;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .team-member {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">
+        <i class="fas fa-rocket"></i> LaunchPad
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="pitches.html">Pitches</a></li>
+          <li class="nav-item"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="aboutus.html">About Us</a></li>
+          <li class="nav-item"><a class="nav-link" href="contactus.html">Contact Us</a></li>
+        </ul>
+        <div class="d-flex align-items-center">
+          <a class="btn btn-outline-light me-2" href="register.html">Register</a>
+          <a class="btn btn-light" href="login.html">Sign in</a>
+          <a class="btn btn-light ms-2" href="profile.html" id="profileBtn" style="display: none;">Profile</a>
+          <button class="btn btn-outline-light ms-2" onclick="handleLogout()" id="logoutBtn" style="display: none;">Logout</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h1>About Launchpad</h1>
+    <p>
+      <strong>Launchpad – Startup Pitch Portal</strong> is a student-led initiative designed to provide a platform for budding entrepreneurs to present their startup ideas. Our mission is to empower innovative minds by offering a simple, structured way to submit and track startup pitches.
+    </p>
+
+    <h2>Meet Our Team</h2>
+    <div class="team-section">
+      <div class="team-member">
+        <img src="https://via.placeholder.com/110" alt="Ankita Gidde">
+        <h3>Ankita Gidde</h3>
+        <p>Frontend Developer</p>
+      </div>
+      <div class="team-member">
+        <img src="https://via.placeholder.com/110" alt="Samruddhi Kshirsagar">
+        <h3>Samruddhi Kshirsagar</h3>
+        <p>UI/UX Designer</p>
+      </div>
+      <div class="team-member">
+        <img src="https://via.placeholder.com/110" alt="Tanish Jadhav">
+        <h3>Tanish Jadhav</h3>
+        <p>Backend & Firebase</p>
+      </div>
+      <div class="team-member">
+        <img src="https://via.placeholder.com/110" alt="Prafull Harer">
+        <h3>Prafull Harer</h3>
+        <p>Project Manager</p>
+      </div>
+    </div>
+
+    <div class="launchpad-info">
+      <h2>Launchpad for Startups</h2>
+      <p>Our platform is designed to support startup founders and student innovators with the following:</p>
+      <ul>
+        <li>Submit your startup pitch with a clear, structured form</li>
+        <li>Track all your ideas and submissions in one place</li>
+        <li>Showcase your startup to potential mentors and investors</li>
+        <li>Receive constructive feedback and support from a community</li>
+        <li>Connect with other aspiring entrepreneurs</li>
+      </ul>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

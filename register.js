@@ -1,17 +1,17 @@
-// Import Firebase SDK
+// Import Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, FacebookAuthProvider, TwitterAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, FacebookAuthProvider, TwitterAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// Your web app's Firebase configuration
+// Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyA8ZedixW9VBxK9vew-mZrIiArs4pD2qME",
-    authDomain: "launchpad2025-fbf68.firebaseapp.com",
-    projectId: "launchpad2025-fbf68",
-    storageBucket: "launchpad2025-fbf68.firebasestorage.app",
-    messagingSenderId: "287852575824",
-    appId: "1:287852575824:web:f3fba7158a9f43feb26555",
-    measurementId: "G-GZEVYXLSNN"
+    apiKey: "AIzaSyC2C2dq3RwYQeUGGA8MzLgxtudcnL_dKuo",
+    authDomain: "launchpad-2ab08.firebaseapp.com",
+    projectId: "launchpad-2ab08",
+    storageBucket: "launchpad-2ab08.firebasestorage.app",
+    messagingSenderId: "974657612108",
+    appId: "1:974657612108:web:adbc2eb0183ca5996687e9",
+    measurementId: "G-Y3B565L6E0"
 };
 
 // Initialize Firebase
@@ -69,9 +69,10 @@ registerForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     clearMessages();
 
-    const fullName = document.getElementById('signupName').value.trim();
-    const email = document.getElementById('signupEmail').value.trim();
+    const fullName = document.getElementById('signupName').value;
+    const email = document.getElementById('signupEmail').value;
     const password = passwordInput.value;
+    const selectedRole = document.getElementById('userRole').value;
 
     if (!validatePassword(password)) {
         showError('Please make sure your password meets all the requirements.');
@@ -80,31 +81,34 @@ registerForm.addEventListener('submit', async function(e) {
 
     // Show loading state
     const submitButton = registerForm.querySelector('button[type="submit"]');
-    const spinner = submitButton.querySelector('.spinner-border');
+    const originalText = submitButton.textContent;
     submitButton.disabled = true;
-    spinner.classList.remove('d-none');
+    submitButton.textContent = "Creating Account...";
 
     try {
-        // Create user account
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
+        
+        // Update user profile
+        await updateProfile(user, {
+            displayName: fullName
+        });
 
         // Save additional user data to Firestore
         await setDoc(doc(db, 'users', user.uid), {
-            fullName,
-            email,
-            createdAt: serverTimestamp(),
-            userId: user.uid,
-            role: 'user'
+            fullName: fullName,
+            email: email,
+            role: selectedRole,
+            createdAt: serverTimestamp()
         });
 
-        // Show success message and redirect
+        // Registration successful
         showSuccess('Account created successfully! Redirecting...');
         setTimeout(() => {
-            window.location.href = 'login.html';
+            window.location.href = 'index.html';
         }, 2000);
     } catch (error) {
-        console.error('Registration error:', error);
+        console.error("Registration error:", error);
         let errorMessage = 'Failed to create account. ';
 
         switch (error.code) {
@@ -128,7 +132,7 @@ registerForm.addEventListener('submit', async function(e) {
     } finally {
         // Reset button state
         submitButton.disabled = false;
-        spinner.classList.add('d-none');
+        submitButton.textContent = originalText;
     }
 });
 
@@ -137,15 +141,15 @@ document.querySelectorAll('.social-button').forEach(button => {
     button.addEventListener('click', async function() {
         const provider = this.querySelector('img').getAttribute('alt').toLowerCase();
         clearMessages();
-
+        
         // Show loading state
         const submitButton = registerForm.querySelector('button[type="submit"]');
-        const spinner = submitButton.querySelector('.spinner-border');
+        const originalText = submitButton.textContent;
         submitButton.disabled = true;
-        spinner.classList.remove('d-none');
-
+        submitButton.textContent = "Connecting...";
+        
         let authProvider;
-
+        
         switch (provider) {
             case 'google':
                 authProvider = new GoogleAuthProvider();
@@ -157,20 +161,31 @@ document.querySelectorAll('.social-button').forEach(button => {
                 authProvider = new TwitterAuthProvider();
                 break;
         }
-
+        
         if (authProvider) {
             try {
                 const result = await signInWithPopup(auth, authProvider);
-                // Social login successful
-                window.location.href = 'index.html';
+                const user = result.user;
+                
+                if (result.additionalUserInfo.isNewUser) {
+                    // Save new user data to Firestore
+                    await setDoc(doc(db, 'users', user.uid), {
+                        fullName: user.displayName || 'User',
+                        email: user.email,
+                        role: 'startup', // Default role
+                        createdAt: serverTimestamp()
+                    });
+                }
+                
+                window.location.href = "index.html";
             } catch (error) {
-                console.error('Social login error:', error);
+                console.error("Social login error:", error);
                 showError(error.message);
             } finally {
                 // Reset button state
                 submitButton.disabled = false;
-                spinner.classList.add('d-none');
+                submitButton.textContent = originalText;
             }
         }
     });
-}); 
+});

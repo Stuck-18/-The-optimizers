@@ -2,8 +2,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { getDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -147,7 +147,8 @@ async function handleLogin(email, password) {
         const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
         loginModal.hide();
         
-        alert('Successfully logged in!');
+        // Show success toast
+        showSuccessToast(Welcome back, ${user.displayName || 'User'}!);
         
         // Redirect to index.html
         window.location.href = 'index.html';
@@ -179,6 +180,9 @@ async function handleLogin(email, password) {
 // Handle signup
 async function handleSignup(name, email, password) {
     try {
+        // Get selected role
+        const selectedRole = document.querySelector('input[name="userRole"]:checked').value;
+        
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         
@@ -187,11 +191,20 @@ async function handleSignup(name, email, password) {
             displayName: name
         });
         
+        // Save user data to Firestore
+        await setDoc(doc(db, 'users', user.uid), {
+            name: name,
+            email: email,
+            role: selectedRole,
+            createdAt: new Date().toISOString()
+        });
+        
         // Close modal
         const signupModal = bootstrap.Modal.getInstance(document.getElementById('signupModal'));
         signupModal.hide();
         
-        alert('Successfully signed up and logged in!');
+        // Show success toast
+        showSuccessToast('Registration successful! Welcome to LaunchPad!');
         
         // Redirect to index.html
         window.location.href = 'index.html';
@@ -220,33 +233,36 @@ async function handleSignup(name, email, password) {
     }
 }
 
-// Function to update UI based on auth state
+// Update UI based on auth state
 function updateAuthUI(user) {
-    const loginBtn = document.querySelector('a[href="login.html"]');
-    const signupBtn = document.querySelector('a[href="register.html"]');
+    const loginBtn = document.getElementById('loginBtn');
+    const registerBtn = document.getElementById('registerBtn');
     const profileBtn = document.getElementById('profileBtn');
     const logoutBtn = document.getElementById('logoutBtn');
     
     if (user) {
         // User is signed in
         if (loginBtn) loginBtn.style.display = 'none';
-        if (signupBtn) signupBtn.style.display = 'none';
-        if (profileBtn) profileBtn.style.display = 'block';
-        if (logoutBtn) logoutBtn.style.display = 'block';
+        if (registerBtn) registerBtn.style.display = 'none';
+        if (profileBtn) profileBtn.style.display = 'inline-block';
+        if (logoutBtn) logoutBtn.style.display = 'inline-block';
     } else {
         // User is signed out
-        if (loginBtn) loginBtn.style.display = 'block';
-        if (signupBtn) signupBtn.style.display = 'block';
+        if (loginBtn) loginBtn.style.display = 'inline-block';
+        if (registerBtn) registerBtn.style.display = 'inline-block';
         if (profileBtn) profileBtn.style.display = 'none';
         if (logoutBtn) logoutBtn.style.display = 'none';
     }
 }
 
+// Make updateAuthUI available globally
+window.updateAuthUI = updateAuthUI;
+
 // Handle logout
 async function handleLogout() {
     try {
         await signOut(auth);
-        alert('Successfully logged out!');
+        showSuccessToast('You have been successfully logged out.');
     } catch (error) {
         console.error('Logout error:', error);
         alert(error.message);
@@ -296,7 +312,25 @@ async function showProfile() {
         // Update profile modal with user data
         document.getElementById('profileName').textContent = user.displayName || 'No name set';
         document.getElementById('profileEmail').textContent = user.email;
-        document.getElementById('profileAccountType').textContent = userData?.accountType || 'Standard';
+        
+        // Format role for display
+        let roleDisplay = 'Standard';
+        if (userData?.role) {
+            switch(userData.role) {
+                case 'startup':
+                    roleDisplay = 'Startup Founder';
+                    break;
+                case 'mentor':
+                    roleDisplay = 'Mentor';
+                    break;
+                case 'investor':
+                    roleDisplay = 'Investor';
+                    break;
+                default:
+                    roleDisplay = userData.role;
+            }
+        }
+        document.getElementById('profileAccountType').textContent = roleDisplay;
         
         // Format dates
         const memberSince = user.metadata.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : 'Unknown';
@@ -315,4 +349,23 @@ async function showProfile() {
 }
 
 // Make showProfile available globally
-window.showProfile = showProfile; 
+window.showProfile = showProfile;
+
+// Function to show success toast
+function showSuccessToast(message) {
+  const toastEl = document.getElementById('successToast');
+  const toastMessage = document.getElementById('toastMessage');
+  
+  if (toastEl && toastMessage) {
+    toastMessage.textContent = message;
+    const toast = new bootstrap.Toast(toastEl, {
+      animation: true,
+      autohide: true,
+      delay: 3000
+    });
+    toast.show();
+  }
+}
+
+// Make showSuccessToast available globally
+window.showSuccessToast = showSuccessToast;

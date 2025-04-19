@@ -194,6 +194,48 @@
       display: none;
       margin-top: 1rem;
     }
+
+    .role-selection {
+      margin-bottom: 1.5rem;
+    }
+
+    .role-label {
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .form-select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      background-color: white;
+      cursor: pointer;
+    }
+
+    .form-select:focus {
+      border-color: #3b82f6;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+
+    .role-options {
+      display: flex;
+      gap: 16px;
+    }
+
+    .role-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .role-option input[type="radio"] {
+      margin-right: 8px;
+    }
   </style>
 </head>
 <body>
@@ -210,6 +252,15 @@
       <input type="text" id="signupName" placeholder="Full Name" required />
       <input type="email" id="signupEmail" placeholder="Email Address" required />
       <input type="password" id="signupPassword" placeholder="Password" required />
+
+      <div class="role-selection">
+        <label class="role-label" for="userRole">I am a:</label>
+        <select id="userRole" name="userRole" class="form-select">
+          <option value="startup" selected>Startup Founder</option>
+          <option value="mentor">Mentor</option>
+          <option value="investor">Investor</option>
+        </select>
+      </div>
 
       <div class="requirements">
         <div class="requirement">✓ At least 8 characters</div>
@@ -305,6 +356,7 @@
       const fullName = document.getElementById('signupName').value;
       const email = document.getElementById('signupEmail').value;
       const password = passwordInput.value;
+      const selectedRole = document.getElementById('userRole').value;
 
       if (!validatePassword(password)) {
         errorMessage.textContent = "Please make sure your password meets all the requirements.";
@@ -331,13 +383,14 @@
             return firebase.firestore().collection('users').doc(user.uid).set({
               fullName: fullName,
               email: email,
+              role: selectedRole,
               createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
           });
         })
         .then(function() {
           // Registration successful
-          window.location.href = "login.html";
+          window.location.href = "index.html";
         })
         .catch(function(error) {
           // Handle errors
@@ -377,7 +430,69 @@
           firebase.auth().signInWithPopup(authProvider)
             .then(function(result) {
               // Social login successful
-              window.location.href = "index.html";
+              const user = result.user;
+              
+              // Prompt for role selection if this is a new user
+              if (result.additionalUserInfo.isNewUser) {
+                const roleOptions = ['startup', 'mentor', 'investor'];
+                const roleLabels = {
+                  'startup': 'Startup Founder',
+                  'mentor': 'Mentor',
+                  'investor': 'Investor'
+                };
+                
+                // Create a simple modal for role selection
+                const roleModal = document.createElement('div');
+                roleModal.className = 'modal fade';
+                roleModal.id = 'roleSelectionModal';
+                roleModal.innerHTML = `
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title">Select Your Role</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <p>Please select your role to complete registration:</p>
+                        <div class="mb-3">
+                          <label for="socialUserRole" class="form-label">I am a:</label>
+                          <select id="socialUserRole" name="socialUserRole" class="form-select">
+                            <option value="startup" selected>Startup Founder</option>
+                            <option value="mentor">Mentor</option>
+                            <option value="investor">Investor</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="confirmRoleBtn">Continue</button>
+                      </div>
+                    </div>
+                  </div>
+                `;
+                
+                document.body.appendChild(roleModal);
+                const modal = new bootstrap.Modal(roleModal);
+                modal.show();
+                
+                // Handle role confirmation
+                document.getElementById('confirmRoleBtn').addEventListener('click', function() {
+                  const selectedRole = document.getElementById('socialUserRole').value;
+                  
+                  // Save role to Firestore
+                  firebase.firestore().collection('users').doc(user.uid).set({
+                    fullName: user.displayName || 'User',
+                    email: user.email,
+                    role: selectedRole,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                  }).then(function() {
+                    modal.hide();
+                    window.location.href = "index.html";
+                  });
+                });
+              } else {
+                // Existing user, redirect to home
+                window.location.href = "index.html";
+              }
             })
             .catch(function(error) {
               console.error("Social login error:", error);

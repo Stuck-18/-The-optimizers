@@ -25,7 +25,7 @@ export function selectType(type) {
     });
     
     // Add selected class to clicked button
-    document.getElementById(`${type}Btn`).classList.add('active');
+    document.getElementById(${type}Btn).classList.add('active');
     
     // Store the selected type
     window.selectedAccountType = type;
@@ -77,6 +77,6 @@ export function logout() {
 function showMessage(message, type) {
     const messageDiv = document.getElementById('message');
     messageDiv.textContent = message;
-    messageDiv.className = `alert alert-${type === 'error' ? 'danger' : 'success'} mt-3`;
+    messageDiv.className = alert alert-${type === 'error' ? 'danger' : 'success'} mt-3;
     messageDiv.style.display = 'block';
 }
