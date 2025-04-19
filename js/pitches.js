@@ -1,165 +1,207 @@
-// DOM Elements
-const pitchesGrid = document.getElementById('pitchesGrid');
-const searchInput = document.getElementById('searchInput');
-const sortSelect = document.getElementById('sortSelect');
-const filterSelect = document.getElementById('filterSelect');
+// js/pitches.js
 
-// Extended sample data for the pitches page
-const allPitches = [
-    ...samplePitches,
-    {
-        id: 4,
-        title: "FinTech Solutions - Digital Banking Revolution",
-        description: "Next-generation digital banking platform for seamless financial transactions.",
-        image: "https://via.placeholder.com/300x200",
-        videoUrl: "https://www.youtube.com/embed/sample4",
-        views: 2100,
-        likes: 156,
-        comments: 34,
-        rating: 4.7,
-        category: "tech"
-    },
-    {
-        id: 5,
-        title: "GreenEnergy - Renewable Power Solutions",
-        description: "Innovative renewable energy solutions for residential and commercial use.",
-        image: "https://via.placeholder.com/300x200",
-        videoUrl: "https://www.youtube.com/embed/sample5",
-        views: 1800,
-        likes: 134,
-        comments: 28,
-        rating: 4.6,
-        category: "sustainability"
-    },
-    {
-        id: 6,
-        title: "MedTech AI - Healthcare Innovation",
-        description: "AI-powered diagnostic tools for early disease detection.",
-        image: "https://via.placeholder.com/300x200",
-        videoUrl: "https://www.youtube.com/embed/sample6",
-        views: 1650,
-        likes: 98,
-        comments: 42,
-        rating: 4.4,
-        category: "health"
+// Get Firebase instances
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// Initialize variables for pagination and filtering
+let lastVisiblePitch = null;
+const PITCHES_PER_PAGE = 6;
+let currentFilter = 'all';
+let currentSort = 'newest';
+
+// Function to format numbers (e.g., 1000 -> 1k)
+function formatNumber(num) {
+    if (!num) return '0';
+    if (num >= 1000000) {
+        return (num / 1000000).toFixed(1) + 'M';
     }
-];
+    if (num >= 1000) {
+        return (num / 1000).toFixed(1) + 'k';
+    }
+    return num.toString();
+}
 
-// Initialize the page
-document.addEventListener('DOMContentLoaded', () => {
-    displayPitches(allPitches);
-    setupEventListeners();
-});
-
-// Display pitches in the grid
-function displayPitches(pitches) {
-    if (!pitchesGrid) return;
-
-    pitchesGrid.innerHTML = pitches.map(pitch => `
+// Function to create a pitch card
+function createPitchCard(pitch) {
+    const statusClass = pitch.status === 'approved' ? 'bg-success' : 
+                       pitch.status === 'pending' ? 'bg-warning' : 'bg-secondary';
+    
+    return `
         <div class="col-md-4 mb-4">
-            <div class="card pitch-card fade-in">
-                <img src="${pitch.image}" class="card-img-top" alt="${pitch.title}">
+            <div class="card h-100 shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title">${pitch.title}</h5>
-                    <p class="card-text">${pitch.description}</p>
-                    <div class="pitch-stats d-flex justify-content-between">
-                        <span><i class="fas fa-eye"></i> ${formatNumber(pitch.views)}</span>
-                        <span><i class="fas fa-heart"></i> ${formatNumber(pitch.likes)}</span>
-                        <span><i class="fas fa-comment"></i> ${formatNumber(pitch.comments)}</span>
-                        <span><i class="fas fa-star"></i> ${pitch.rating}</span>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="card-title mb-0">${pitch.startupName || 'Unnamed Startup'}</h5>
+                        <span class="badge ${statusClass}">${pitch.status || 'pending'}</span>
                     </div>
-                    <a href="pitch-detail.html?id=${pitch.id}" class="btn btn-primary mt-3">View Details</a>
+                    <h6 class="text-muted">${pitch.domain || pitch.category || 'Uncategorized'}</h6>
+                    <p class="card-text">${pitch.summary ? (pitch.summary.length > 150 ? pitch.summary.substring(0, 150) + '...' : pitch.summary) : 'No description available'}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="small text-muted">
+                            <i class="fas fa-user"></i> ${pitch.founderName || 'Anonymous'}
+                        </div>
+                        <div class="small text-muted">
+                            <i class="fas fa-users"></i> ${pitch.teamSize || 'N/A'}
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <div>
+                            <span class="me-2"><i class="fas fa-eye"></i> ${formatNumber(pitch.views)}</span>
+                            <span><i class="fas fa-heart"></i> ${formatNumber(pitch.likes)}</span>
+                        </div>
+                        <span class="badge bg-info">${pitch.stage || 'Early Stage'}</span>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a href="pitch-details.html?id=${pitch.id}" class="btn btn-primary w-100">View Details</a>
                 </div>
             </div>
         </div>
-    `).join('');
+    `;
 }
 
-// Setup event listeners for search, sort, and filter
-function setupEventListeners() {
-    // Search functionality
-    if (searchInput) {
-        searchInput.addEventListener('input', debounce(handleSearch, 300));
+// Function to display loading state
+function showLoading() {
+    const pitchesGrid = document.getElementById('pitchesGrid');
+    pitchesGrid.innerHTML = `
+        <div class="col-12 text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    `;
+}
+
+// Function to fetch pitches
+async function fetchPitches() {
+    try {
+        console.log('Fetching pitches...'); // Debug log
+        showLoading();
+        
+        let query = db.collection('pitches');
+
+        // Apply filters
+        if (currentFilter !== 'all') {
+            query = query.where('category', '==', currentFilter);
+        }
+
+        // Apply sorting
+        switch (currentSort) {
+            case 'newest':
+                query = query.orderBy('createdAt', 'desc');
+                break;
+            case 'oldest':
+                query = query.orderBy('createdAt', 'asc');
+                break;
+            case 'rating':
+                query = query.orderBy('likes', 'desc');
+                break;
+            case 'views':
+                query = query.orderBy('views', 'desc');
+                break;
+        }
+
+        // Apply pagination
+        query = query.limit(PITCHES_PER_PAGE);
+        if (lastVisiblePitch) {
+            query = query.startAfter(lastVisiblePitch);
+        }
+
+        console.log('Executing query...'); // Debug log
+        const snapshot = await query.get();
+        console.log('Received snapshot with size:', snapshot.size); // Debug log
+
+        const pitches = [];
+        snapshot.forEach(doc => {
+            console.log('Processing document:', doc.id); // Debug log
+            pitches.push({
+                id: doc.id,
+                ...doc.data()
+            });
+        });
+
+        // Update last visible pitch for pagination
+        lastVisiblePitch = snapshot.docs[snapshot.docs.length - 1];
+
+        // Display pitches
+        const pitchesGrid = document.getElementById('pitchesGrid');
+        if (pitches.length === 0) {
+            pitchesGrid.innerHTML = `
+                <div class="col-12 text-center py-5">
+                    <h4>No pitches found</h4>
+                    <p class="text-muted">Try adjusting your filters or search criteria</p>
+                </div>
+            `;
+            return;
+        }
+
+        pitchesGrid.innerHTML = pitches.map(pitch => createPitchCard(pitch)).join('');
+
+    } catch (error) {
+        console.error('Error fetching pitches:', error);
+        const pitchesGrid = document.getElementById('pitchesGrid');
+        pitchesGrid.innerHTML = `
+            <div class="col-12 text-center py-5">
+                <div class="alert alert-danger" role="alert">
+                    <h5>Error loading pitches</h5>
+                    <p>${error.message}</p>
+                </div>
+            </div>
+        `;
     }
+}
+
+// Event Listeners
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM Content Loaded'); // Debug log
+    
+    // Initial load
+    fetchPitches();
+
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    let searchTimeout;
+    searchInput.addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            lastVisiblePitch = null;
+            fetchPitches();
+        }, 500);
+    });
 
     // Sort functionality
-    if (sortSelect) {
-        sortSelect.addEventListener('change', handleSort);
-    }
+    const sortSelect = document.getElementById('sortSelect');
+    sortSelect.addEventListener('change', (e) => {
+        currentSort = e.target.value;
+        lastVisiblePitch = null;
+        fetchPitches();
+    });
 
     // Filter functionality
-    if (filterSelect) {
-        filterSelect.addEventListener('change', handleFilter);
-    }
-}
-
-// Handle search
-function handleSearch() {
-    const searchTerm = searchInput.value.toLowerCase();
-    const filteredPitches = allPitches.filter(pitch => 
-        pitch.title.toLowerCase().includes(searchTerm) ||
-        pitch.description.toLowerCase().includes(searchTerm)
-    );
-    displayPitches(filteredPitches);
-}
-
-// Handle sorting
-function handleSort() {
-    const sortValue = sortSelect.value;
-    let sortedPitches = [...allPitches];
-
-    switch (sortValue) {
-        case 'newest':
-            sortedPitches.sort((a, b) => b.id - a.id);
-            break;
-        case 'oldest':
-            sortedPitches.sort((a, b) => a.id - b.id);
-            break;
-        case 'rating':
-            sortedPitches.sort((a, b) => b.rating - a.rating);
-            break;
-        case 'views':
-            sortedPitches.sort((a, b) => b.views - a.views);
-            break;
-    }
-
-    displayPitches(sortedPitches);
-}
-
-// Handle filtering
-function handleFilter() {
-    const filterValue = filterSelect.value;
-    const filteredPitches = filterValue === 'all' 
-        ? allPitches 
-        : allPitches.filter(pitch => pitch.category === filterValue);
-    displayPitches(filteredPitches);
-}
-
-// Debounce function for search input
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-// Add animation classes to elements as they come into view
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.classList.add('fade-in');
-        }
+    const filterSelect = document.getElementById('filterSelect');
+    filterSelect.addEventListener('change', (e) => {
+        currentFilter = e.target.value;
+        lastVisiblePitch = null;
+        fetchPitches();
     });
-}, {
-    threshold: 0.1
 });
 
-// Observe all pitch cards
-document.querySelectorAll('.pitch-card').forEach(card => {
-    observer.observe(card);
+// Update navigation based on auth state
+auth.onAuthStateChanged(user => {
+    const loginLink = document.querySelector('a[href="login.html"]');
+    const signUpLink = document.querySelector('a[href="register.html"]');
+    const dashboardLink = document.querySelector('a[href="dashboard.html"]');
+
+    if (user) {
+        // User is signed in
+        loginLink.style.display = 'none';
+        signUpLink.style.display = 'none';
+        dashboardLink.style.display = 'block';
+    } else {
+        // User is signed out
+        loginLink.style.display = 'block';
+        signUpLink.style.display = 'block';
+        dashboardLink.style.display = 'none';
+    }
 });
