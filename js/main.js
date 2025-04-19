@@ -4,7 +4,7 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, si
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
 import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { getUserRole } from './auth-utils.js';
+import { formatNumber } from './utils.js';
 
 // Firebase configuration
 const firebaseConfig = {
@@ -148,9 +148,15 @@ async function handleLogin(email, password) {
         const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
         loginModal.hide();
         
-        // Show success toast
-        showSuccessToast(Welcome back, ${user.displayName || 'User'}!);
-        
+        // Show success message
+        const message = `Welcome back, ${user.displayName || 'User'}!`;
+        const toastEl = document.getElementById('successToast');
+        if (toastEl) {
+            showSuccessToast(message);
+        } else {
+            alert(message);
+        }
+    
         // Redirect to index.html
         window.location.href = 'index.html';
     } catch (error) {
@@ -282,11 +288,6 @@ function handlePitchSubmission(title, description, videoUrl, image) {
     pitchModal.hide();
 }
 
-// Utility function to format numbers
-function formatNumber(num) {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
-
 // Add smooth scrolling to all links
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
@@ -370,51 +371,3 @@ function showSuccessToast(message) {
 
 // Make showSuccessToast available globally
 window.showSuccessToast = showSuccessToast;
-
-// Function to update navigation based on user role
-async function updateNavigation(user) {
-    const navItems = {
-        startup: [
-            { id: 'submit-pitch', text: 'Submit Pitch', href: 'submit-pitch.html' },
-            { id: 'founder-dashboard', text: 'Dashboard', href: 'founderdashboard.html' }
-        ],
-        investor: [
-            { id: 'view-pitches', text: 'View Pitches', href: 'view-pitches.html' },
-            { id: 'investor-dashboard', text: 'Dashboard', href: 'investordashboard.html' }
-        ],
-        mentor: [
-            { id: 'view-pitches', text: 'View Pitches', href: 'view-pitches.html' },
-            { id: 'mentor-dashboard', text: 'Dashboard', href: 'mentordashboard.html' }
-        ]
-    };
-
-    const nav = document.querySelector('#navbarNav .navbar-nav');
-    
-    // Clear existing dynamic nav items
-    const dynamicNav = nav.querySelector('.dynamic-nav');
-    if (dynamicNav) {
-        dynamicNav.remove();
-    }
-
-    if (user) {
-        const role = await getUserRole(user);
-        if (role && navItems[role]) {
-            const dynamicNavContainer = document.createElement('div');
-            dynamicNavContainer.className = 'dynamic-nav';
-            
-            navItems[role].forEach(item => {
-                const li = document.createElement('li');
-                li.className = 'nav-item';
-                li.innerHTML = `<a class="nav-link" href="${item.href}">${item.text}</a>`;
-                dynamicNavContainer.appendChild(li);
-            });
-            
-            nav.insertBefore(dynamicNavContainer, nav.firstChild);
-        }
-    }
-}
-
-// Update navigation when auth state changes
-firebase.auth().onAuthStateChanged(async (user) => {
-    await updateNavigation(user);
-});
