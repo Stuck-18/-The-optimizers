@@ -1,3 +1,6 @@
+// Import utilities
+import { formatNumber } from './utils.js';
+
 // Sample data for charts and tables
 const engagementData = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
@@ -201,12 +204,25 @@ function updateStats() {
         rating: (Math.random() * 0.5 + 4.3).toFixed(1)
     };
 
-    // Update DOM elements
-    document.querySelector('.stat-card:nth-child(1) h3').textContent = formatNumber(stats.views);
-    document.querySelector('.stat-card:nth-child(2) h3').textContent = formatNumber(stats.likes);
-    document.querySelector('.stat-card:nth-child(3) h3').textContent = formatNumber(stats.comments);
-    document.querySelector('.stat-card:nth-child(4) h3').textContent = stats.rating;
+    // Update DOM elements with null checks
+    const statElements = {
+        views: document.querySelector('.stat-card:nth-child(1) h3'),
+        likes: document.querySelector('.stat-card:nth-child(2) h3'),
+        comments: document.querySelector('.stat-card:nth-child(3) h3'),
+        rating: document.querySelector('.stat-card:nth-child(4) h3')
+    };
+
+    // Only update elements that exist
+    if (statElements.views) statElements.views.textContent = formatNumber(stats.views);
+    if (statElements.likes) statElements.likes.textContent = formatNumber(stats.likes);
+    if (statElements.comments) statElements.comments.textContent = formatNumber(stats.comments);
+    if (statElements.rating) statElements.rating.textContent = stats.rating;
 }
 
-// Update stats every 30 seconds
-setInterval(updateStats, 30000); 
+// Only start the interval if we're on the dashboard page
+if (document.querySelector('.stat-card')) {
+    // Update stats every 30 seconds
+    setInterval(updateStats, 30000);
+    // Initial update
+    updateStats();
+} 
