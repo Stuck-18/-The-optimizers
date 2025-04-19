@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>User Dashboard - LaunchPad</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css"/>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            color: #003366;
+        }
+        .navbar {
+            background-color: #007bff !important;
+        }
+        .navbar .nav-link,
+        .navbar-brand {
+            color: #fff !important;
+        }
+        .navbar .btn-outline-light {
+            border-color: #fff;
+            color: #fff;
+        }
+        .navbar .btn-outline-light:hover {
+            background-color: #ffffff;
+            color: #007bff;
+        }
+        .metric-card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .metric-icon {
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+        .trend {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="index.html">
+            <i class="fas fa-rocket me-2"></i><strong>LaunchPad</strong>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="submit-pitch.html">Submit Pitch</a></li>
+                <li class="nav-item"><a class="nav-link" href="about.html">About Us</a></li>
+                <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+                <li class="nav-item"><a class="nav-link btn btn-outline-light ms-2" href="logout.html">Logout</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- User Dashboard -->
+<section class="user-dashboard py-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h1 class="display-5 fw-bold">Welcome, Founder!</h1>
+                <p class="lead">Track your startup journey and pitch progress</p>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-icon text-primary">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <h3>3</h3>
+                    <p>Active Pitches</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-icon text-warning">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h3>8</h3>
+                    <p>Mentor Feedbacks</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-icon text-success">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>1.2k</h3>
+                    <p>Views</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-icon text-danger">
+                        <i class="fas fa-thumbs-up"></i>
+                    </div>
+                    <h3>24</h3>
+                    <p>Likes</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Pitches -->
+        <div class="card mb-5">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">My Pitches</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>Pitch Title</th>
+                            <th>Status</th>
+                            <th>Submitted</th>
+                            <th>Mentor Assigned</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Smart Healthcare App</td>
+                            <td><span class="badge bg-success">Reviewed</span></td>
+                            <td>3 days ago</td>
+                            <td>Dr. A. Verma</td>
+                            <td><a href="#" class="btn btn-sm btn-outline-primary">View</a></td>
+                        </tr>
+                        <tr>
+                            <td>AgriAI: Crop Prediction Tool</td>
+                            <td><span class="badge bg-warning text-dark">Pending</span></td>
+                            <td>1 day ago</td>
+                            <td>-</td>
+                            <td><a href="#" class="btn btn-sm btn-outline-primary">Edit</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Upcoming Events -->
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">Recent Feedback</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <strong>Smart Healthcare App:</strong> Great solution! Consider focusing more on data security.
+                                <span class="text-muted d-block small">- Dr. A. Verma, 1 day ago</span>
+                            </li>
+                            <li class="list-group-item">
+                                <strong>AgriAI:</strong> Impressive use of machine learning. Add market strategy in the next version.
+                                <span class="text-muted d-block small">- Anonymous Mentor, 2 days ago</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">Upcoming Schedule</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="schedule-item mb-3">
+                            <strong>Pitch Presentation</strong>
+                            <p class="mb-0 text-muted">Tomorrow, 11:00 AM</p>
+                        </div>
+                        <div class="schedule-item">
+                            <strong>Mentorship Call</strong>
+                            <p class="mb-0 text-muted">April 22, 4:00 PM</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer py-4 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-4 mb-4 mb-lg-0">
+                <h5>LaunchPad</h5>
+                <p>Empowering startups through mentorship, funding, and innovation.</p>
+            </div>
+            <div class="col-lg-2 col-md-4">
+                <h6>Explore</h6>
+                <ul class="list-unstyled">
+                    <li><a href="#">Submit Pitch</a></li>
+                    <li><a href="#">Dashboard</a></li>
+                    <li><a href="#">Resources</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-2 col-md-4">
+                <h6>Mentorship</h6>
+                <ul class="list-unstyled">
+                    <li><a href="#">Find Mentor</a></li>
+                    <li><a href="#">FAQs</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-4 text-end">
+                <p class="small mb-0">© 2025 LaunchPad. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Add this script section right after your Firebase initialization -->
+<script>
+// Check user authentication and role
+firebase.auth().onAuthStateChanged(async (user) => {
+    if (user) {
+        try {
+            const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
+            if (!userDoc.exists || userDoc.data().role !== 'startup') {
+                // User is not a founder, redirect to appropriate dashboard
+                window.location.href = 'index.html';
+            }
+        } catch (error) {
+            console.error('Error checking user role:', error);
+            window.location.href = 'index.html';
+        }
+    } else {
+        // No user is signed in, redirect to login
+        window.location.href = 'login.html';
+    }
+});
+</script>
+</body>
+</html>

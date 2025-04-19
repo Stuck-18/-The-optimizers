@@ -23,6 +23,32 @@ const db = getFirestore(app);
 const loginForm = document.getElementById('loginForm');
 const errorMessage = document.getElementById('errorMessage');
 
+// Function to redirect based on user role
+async function redirectBasedOnRole(user) {
+    try {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists()) {
+            const userData = userDoc.data();
+            switch(userData.role) {
+                case 'startup':
+                    window.location.href = 'founderdashboard.html';
+                    break;
+                case 'investor':
+                    window.location.href = 'investordashboard.html';
+                    break;
+                case 'mentor':
+                    window.location.href = 'mentordashboard.html';
+                    break;
+                default:
+                    window.location.href = 'index.html';
+            }
+        }
+    } catch (error) {
+        console.error('Error getting user role:', error);
+        window.location.href = 'index.html';
+    }
+}
+
 // Handle form submission
 loginForm.addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -33,7 +59,8 @@ loginForm.addEventListener('submit', async function(e) {
 
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        window.location.href = 'index.html';
+        const user = userCredential.user;
+        await redirectBasedOnRole(user);
     } catch (error) {
         console.error('Login error:', error);
         errorMessage.textContent = error.message;
