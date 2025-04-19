@@ -45,6 +45,33 @@
         border-radius: 10px;
         box-shadow: 0 4px 12px rgba(218, 66, 66, 0.1);
       }
+
+      .pitch-card {
+        transition: transform 0.2s;
+      }
+      
+      .pitch-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .pitch-details small {
+        display: block;
+        color: #6c757d;
+      }
+
+      .pitch-details i {
+        width: 20px;
+        color: #0d6efd;
+      }
+
+      .stats i {
+        color: #6c757d;
+      }
+
+      .spinner-border {
+        width: 3rem;
+        height: 3rem;
+      }
     </style>
 </head>
 <body>
@@ -95,9 +122,12 @@
     <!-- Featured Pitches Section -->
     <section class="featured-pitches py-5">
         <div class="container">
-            <h2 class="text-center mb-4">Featured Pitches</h2>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Featured Pitches</h2>
+                <a href="pitches.html" class="btn btn-outline-primary">View All Pitches</a>
+            </div>
             <div class="row" id="featuredPitches">
-                <!-- Pitch cards will be dynamically loaded here -->
+                <!-- Pitches will be loaded here -->
             </div>
         </div>
     </section>
@@ -286,55 +316,115 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
     <!-- Custom JS -->
     <script type="module">
-      // Initialize Firebase with your config
-      const firebaseConfig = {
-        apiKey: "AIzaSyC2C2dq3RwYQeUGGA8MzLgxtudcnL_dKuo",
-        authDomain: "launchpad-2ab08.firebaseapp.com",
-        projectId: "launchpad-2ab08",
-        storageBucket: "launchpad-2ab08.firebasestorage.app",
-        messagingSenderId: "974657612108",
-        appId: "1:974657612108:web:adbc2eb0183ca5996687e9",
-        measurementId: "G-Y3B565L6ED"
-      };
+        import { db } from './js/firebase-config.js';
 
-      // Initialize Firebase
-      firebase.initializeApp(firebaseConfig);
-
-      // Add auth state listener
-      firebase.auth().onAuthStateChanged((user) => {
-        const loginBtn = document.getElementById('loginBtn');
-        const registerBtn = document.getElementById('registerBtn');
-        const profileBtn = document.getElementById('profileBtn');
-        const logoutBtn = document.getElementById('logoutBtn');
-        
-        if (user) {
-          // User is signed in
-          loginBtn.style.display = 'none';
-          registerBtn.style.display = 'none';
-          profileBtn.style.display = 'inline-block';
-          logoutBtn.style.display = 'inline-block';
-        } else {
-          // User is signed out
-          loginBtn.style.display = 'inline-block';
-          registerBtn.style.display = 'inline-block';
-          profileBtn.style.display = 'none';
-          logoutBtn.style.display = 'none';
+        // Function to format numbers
+        function formatNumber(num) {
+            if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'k';
+            }
+            return num;
         }
-      });
 
-      // Handle logout function
-      window.handleLogout = async function() {
-        try {
-          await firebase.auth().signOut();
-          window.location.href = 'index.html';
-        } catch (error) {
-          console.error('Logout error:', error);
-          alert(error.message);
+        // Function to display pitches
+        function displayPitches(pitches) {
+            const featuredPitchesContainer = document.getElementById('featuredPitches');
+            if (!featuredPitchesContainer) return;
+
+            if (pitches.length === 0) {
+                featuredPitchesContainer.innerHTML = `
+                    <div class="col-12 text-center">
+                        <p>No pitches available yet.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const pitchesHTML = pitches.map(pitch => `
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">${pitch.startupName}</h5>
+                            <p class="badge bg-primary">${pitch.category}</p>
+                            <p class="card-text">${pitch.summary.substring(0, 100)}...</p>
+                            <div class="pitch-details">
+                                <p class="mb-1"><small><i class="fas fa-user"></i> ${pitch.founderName}</small></p>
+                                <p class="mb-1"><small><i class="fas fa-chart-line"></i> ${pitch.stage}</small></p>
+                                <p class="mb-1"><small><i class="fas fa-users"></i> ${pitch.teamSize}</small></p>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div class="stats">
+                                    <small class="text-muted">
+                                        <i class="fas fa-eye"></i> ${formatNumber(pitch.views || 0)}
+                                        <i class="fas fa-heart ms-2"></i> ${formatNumber(pitch.likes || 0)}
+                                    </small>
+                                </div>
+                                <span class="badge bg-${pitch.status === 'pending' ? 'warning' : 'success'}">${pitch.status}</span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white">
+                            <a href="pitch-detail.html?id=${pitch.id}" class="btn btn-primary btn-sm w-100">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            featuredPitchesContainer.innerHTML = pitchesHTML;
         }
-      };
+
+        // Function to fetch pitches
+        async function fetchPitches() {
+            const featuredPitchesContainer = document.getElementById('featuredPitches');
+            
+            // Show loading state
+            featuredPitchesContainer.innerHTML = `
+                <div class="col-12 text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            `;
+
+            try {
+                console.log('Fetching pitches...'); // Debug log
+                const snapshot = await db.collection('pitches')
+                    .orderBy('createdAt', 'desc')
+                    .limit(6)
+                    .get();
+
+                console.log('Snapshot received:', snapshot.size, 'documents'); // Debug log
+
+                const pitches = [];
+                snapshot.forEach(doc => {
+                    console.log('Processing doc:', doc.id); // Debug log
+                    pitches.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+
+                console.log('Processed pitches:', pitches); // Debug log
+                displayPitches(pitches);
+            } catch (error) {
+                console.error('Error fetching pitches:', error);
+                featuredPitchesContainer.innerHTML = `
+                    <div class="col-12 text-center">
+                        <div class="alert alert-danger" role="alert">
+                            Error loading pitches: ${error.message}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded, fetching pitches...'); // Debug log
+            fetchPitches();
+        });
     </script>
-    <script src="js/main.js" type="module"></script>
 </body>
 </html>

@@ -1,0 +1,12 @@
+{
+  "name": "launchpad",
+  "version": "1.0.0",
+  "description": "Launchpad Startup Platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

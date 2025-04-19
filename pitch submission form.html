@@ -262,17 +262,91 @@
     </form>
   </div>
 
-  <script>
-    document.getElementById('pitchForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(this).entries());
-      console.log("Startup Pitch Submitted:", data);
-      // Store the form data in localStorage for persistence
-      localStorage.setItem('pitchData', JSON.stringify(data));
-      // Redirect to the dashboard
-      window.location.href = 'dashboard.html';
+  <!-- Update your Firebase SDK imports -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
+
+  <!-- Replace your existing Firebase initialization script with this -->
+  <script type="module">
+    import { auth, db } from './js/firebase-config.js';
+
+    // Check if user is authenticated
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+            // If not logged in, redirect to login page
+            window.location.href = 'login.html';
+            return;
+        }
+
+        try {
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (!userDoc.exists || userDoc.data().role !== 'startup') {
+                // Only startup founders can submit pitches
+                alert('Only startup founders can submit pitches');
+                window.location.href = 'index.html';
+            }
+        } catch (error) {
+            console.error('Error checking user role:', error);
+            window.location.href = 'index.html';
+        }
+    });
+
+    // Handle form submission
+    document.getElementById('pitchForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        try {
+            const user = auth.currentUser;
+            if (!user) {
+                alert('You must be logged in to submit a pitch');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Get form data
+            const formData = Object.fromEntries(new FormData(this).entries());
+            
+            // Add additional metadata
+            const pitchData = {
+                ...formData,
+                userId: user.uid,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                status: 'pending', // Initial status
+                likes: 0,
+                views: 0
+            };
+
+            // Show loading state
+            const submitButton = this.querySelector('button[type="submit"]');
+            const originalText = submitButton.innerHTML;
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+            try {
+                // Save to Firestore
+                await db.collection('pitches').add(pitchData);
+
+                // Show success message
+                alert('Pitch submitted successfully!');
+                
+                // Redirect to founder dashboard
+                window.location.href = 'founderdashboard.html';
+            } catch (error) {
+                throw new Error('Failed to save pitch: ' + error.message);
+            }
+
+        } catch (error) {
+            console.error('Error submitting pitch:', error);
+            alert('Error submitting pitch: ' + error.message);
+            
+            // Reset submit button
+            const submitButton = this.querySelector('button[type="submit"]');
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalText;
+        }
     });
   </script>
-
 </body>
 </html>
