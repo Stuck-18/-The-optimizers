@@ -4,6 +4,7 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, si
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
 import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getUserRole } from './auth-utils.js';
 
 // Firebase configuration
 const firebaseConfig = {
@@ -369,3 +370,51 @@ function showSuccessToast(message) {
 
 // Make showSuccessToast available globally
 window.showSuccessToast = showSuccessToast;
+
+// Function to update navigation based on user role
+async function updateNavigation(user) {
+    const navItems = {
+        startup: [
+            { id: 'submit-pitch', text: 'Submit Pitch', href: 'submit-pitch.html' },
+            { id: 'founder-dashboard', text: 'Dashboard', href: 'founderdashboard.html' }
+        ],
+        investor: [
+            { id: 'view-pitches', text: 'View Pitches', href: 'view-pitches.html' },
+            { id: 'investor-dashboard', text: 'Dashboard', href: 'investordashboard.html' }
+        ],
+        mentor: [
+            { id: 'view-pitches', text: 'View Pitches', href: 'view-pitches.html' },
+            { id: 'mentor-dashboard', text: 'Dashboard', href: 'mentordashboard.html' }
+        ]
+    };
+
+    const nav = document.querySelector('#navbarNav .navbar-nav');
+    
+    // Clear existing dynamic nav items
+    const dynamicNav = nav.querySelector('.dynamic-nav');
+    if (dynamicNav) {
+        dynamicNav.remove();
+    }
+
+    if (user) {
+        const role = await getUserRole(user);
+        if (role && navItems[role]) {
+            const dynamicNavContainer = document.createElement('div');
+            dynamicNavContainer.className = 'dynamic-nav';
+            
+            navItems[role].forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'nav-item';
+                li.innerHTML = `<a class="nav-link" href="${item.href}">${item.text}</a>`;
+                dynamicNavContainer.appendChild(li);
+            });
+            
+            nav.insertBefore(dynamicNavContainer, nav.firstChild);
+        }
+    }
+}
+
+// Update navigation when auth state changes
+firebase.auth().onAuthStateChanged(async (user) => {
+    await updateNavigation(user);
+});

@@ -60,7 +60,25 @@ loginForm.addEventListener('submit', async function(e) {
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
-        await redirectBasedOnRole(user);
+        
+        // Get user role and redirect
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists()) {
+            const role = userDoc.data().role;
+            switch(role) {
+                case 'startup':
+                    window.location.href = 'founderdashboard.html';
+                    break;
+                case 'investor':
+                    window.location.href = 'investordashboard.html';
+                    break;
+                case 'mentor':
+                    window.location.href = 'mentordashboard.html';
+                    break;
+                default:
+                    window.location.href = 'index.html';
+            }
+        }
     } catch (error) {
         console.error('Login error:', error);
         errorMessage.textContent = error.message;
